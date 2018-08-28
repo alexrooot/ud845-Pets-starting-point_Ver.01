@@ -15,10 +15,13 @@
  */
 package com.example.android.pets;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +29,20 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.example.android.pets.data.PetContract;
+
+/**
+ * The next import is looking for files in package we created called data
+ * we also told it to look at the class file PetContract,
+ * so if we want to use something form that class file we can use the
+ * mGender = PetContract.PetEntry.GENDER_MALE;
+ * Or under import we can use import com.example.android.pets.data.PetContract.PetEntry;
+ * and then just use mGender = PetEntry.GENDER_MALE;
+ */
+import com.example.android.pets.data.PetContract;
+import com.example.android.pets.data.PetDbHelper;
 
 /**
  * Allows user to create a new pet or edit an existing one.
@@ -86,11 +103,11 @@ public class EditorActivity extends AppCompatActivity {
                 String selection = (String) parent.getItemAtPosition(position);
                 if (!TextUtils.isEmpty(selection)) {
                     if (selection.equals(getString(R.string.gender_male))) {
-                        mGender = 1; // Male
+                        mGender = PetContract.PetEntry.GENDER_MALE; // Male
                     } else if (selection.equals(getString(R.string.gender_female))) {
-                        mGender = 2; // Female
+                        mGender = PetContract.PetEntry.GENDER_FEMALE; // Female
                     } else {
-                        mGender = 0; // Unknown
+                        mGender = PetContract.PetEntry.GENDER_UNKNOWN; // Unknown
                     }
                 }
             }
@@ -101,6 +118,47 @@ public class EditorActivity extends AppCompatActivity {
                 mGender = 0; // Unknown
             }
         });
+    }
+
+    /**
+     *
+     *
+     * Making a new method to save the user entered data from the Editetext
+     */
+    private void insertpet(){
+        String nameString =  mNameEditText.getText().toString().trim();
+        String breedString = mBreedEditText.getText().toString().trim();
+        int genderString = mGender;
+        String weightString = mWeightEditText.getText().toString().trim();
+        // convert the string to int value if possible
+        int weight = Integer.parseInt(weightString);
+
+        //instiate the class petHelepr for  use in this method to pass over elements
+        PetDbHelper mDbHelper = new PetDbHelper(this);
+
+        // instiate a write to databse write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        //Starte to build the content values again just like for the dummy
+        ContentValues values = new ContentValues();
+        values.put(PetContract.PetEntry.COLUMN_PET_NAME, nameString);
+        values.put(PetContract.PetEntry.COLUMN_PET_BREED, breedString);
+        values.put(PetContract.PetEntry.COLUMN_PET_WEIGHT, weight);
+        values.put(PetContract.PetEntry.COLUMN_PET_GENDER,genderString);
+
+        //Send data to helper instance
+        // and save the return value of db.insert(PetContract.PetEntry.TABLE_NAME,null, values);
+        long newPet = db.insert(PetContract.PetEntry.TABLE_NAME,null, values);
+
+        if (newPet != -1){
+            Log.v("database Entry Info", "The Manual edite entered "+newPet );
+            Toast dbToast = Toast.makeText(getApplicationContext(),"Pet saved ", Toast.LENGTH_SHORT);
+            dbToast.setMargin(50,50);
+            dbToast.show();
+        }else{
+            Log.v("database Entry Info", "The Manual edite entered did not enter the correct value" );
+        }
+
     }
 
     @Override
@@ -117,7 +175,8 @@ public class EditorActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Save" menu option
             case R.id.action_save:
-                // Do nothing for now
+                // Just call on the method above
+                insertpet();
                 return true;
             // Respond to a click on the "Delete" menu option
             case R.id.action_delete:
