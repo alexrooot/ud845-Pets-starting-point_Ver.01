@@ -58,4 +58,16 @@
 
     <!-- Label for dropdown menu option if the pet is female [CHAR LIMIT=20] -->
     <string name="gender_female">Female</string>
+    <!-- Text Message for success in inserting new pet into database from the Edit window -->
+
+    <string name ="Edite_Fail_insert_log">The Manual edit entered did not enter the correctly value</string>
+    <!-- Text Message for success in inserting new pet into database from the Edit window -->
+
+    <string name ="Edite_success_insert_log">Yes the manual edit entered did  enter the correctly value</string>
+
+    <!-- Text for toast in Edit window success-->
+    <string name = "Edit_Pet_Enter_Successuly">Saved =)</string>
+
+    <!--More to come -->
+
 </resources>

@@ -17,6 +17,7 @@ package com.example.android.pets;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -148,15 +149,17 @@ public class EditorActivity extends AppCompatActivity {
 
         //Send data to helper instance
         // and save the return value of db.insert(PetContract.PetEntry.TABLE_NAME,null, values);
-        long newPet = db.insert(PetContract.PetEntry.TABLE_NAME,null, values);
+        //Not used onle manual method now use contentProvider long newPet = db.insert(PetContract.PetEntry.TABLE_NAME,null, values);
 
-        if (newPet != -1){
-            Log.v("database Entry Info", "The Manual edite entered "+newPet );
-            Toast dbToast = Toast.makeText(getApplicationContext(),"Pet saved ", Toast.LENGTH_SHORT);
+        Uri newId = getContentResolver().insert(PetContract.PetEntry.CONTENT_URI, values);
+
+        if (newId != null){
+            Log.v("database Entry Info", "The Manual edite entered "+newId );
+            Toast dbToast = Toast.makeText(getApplicationContext(),R.string.action_save, Toast.LENGTH_SHORT);
             dbToast.setMargin(50,50);
             dbToast.show();
         }else{
-            Log.v("database Entry Info", "The Manual edite entered did not enter the correct value" );
+            Log.v("database Entry Info", "R.string.Edite_Fail_insert_log" );
         }
 
     }

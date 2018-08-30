@@ -1,9 +1,11 @@
 package com.example.android.pets;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.support.design.widget.FloatingActionButton;
@@ -13,9 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-
+// you can import the the classes varaibles b using this two type of imports
+//You can be more specific about what file if you give the specifc class name
+// and it will avoid you from typing in the class name and then file.
 import com.example.android.pets.data.PetContract.PetEntry;
-import com.example.android.pets.data.PetDbHelper;
+//import com.example.android.pets.data.PetDbHelper;
+//import com.example.android.pets.data.PetProvider;
 
 /**
  * Displays list of pets that were entered and stored in the app.
@@ -23,7 +28,7 @@ import com.example.android.pets.data.PetDbHelper;
 public class CatalogActivity extends AppCompatActivity {
 
     //Making a global instance to the class PetHelper
-    PetDbHelper mDbHelper = new PetDbHelper(this);
+    //PetDbHelper mDbHelper = new PetDbHelper(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,11 +44,11 @@ public class CatalogActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        //Used only for manual db access reads
+        //displayDatabaseInfo();
+        //PetDbHelper mDbHelper = new PetDbHelper(this);
 
-        displayDatabaseInfo();
-        PetDbHelper mDbHelper = new PetDbHelper(this);
-
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        //SQLiteDatabase db = mDbHelper.getReadableDatabase();
     }
     @Override
     protected void onStart() {
@@ -59,10 +64,11 @@ public class CatalogActivity extends AppCompatActivity {
     private void displayDatabaseInfo() {
         // To access our database, we instantiate our subclass of SQLiteOpenHelper
         // and pass the context, which is the current activity.
-        PetDbHelper mDbHelper = new PetDbHelper(this);
+        //Not in use onlt for manual access to db PetDbHelper mDbHelper = new PetDbHelper(this);
 
         // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        //This not recomend any more use contentProvider
+        // SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         //Define a projection that specifies the colunms fromthe database
         String[] projection = {BaseColumns._ID,
@@ -78,7 +84,9 @@ public class CatalogActivity extends AppCompatActivity {
         //How you want to store cursor results
         //String sortOrder =
         //        PetEntry._ID + " DESC";
-        Cursor cursor = db.query(
+        /** comment out becouse this is far to manual to connect DB and is now
+         * recomended to use contentProviders
+         * Cursor cursor = db.query(
                 PetEntry.TABLE_NAME,
                 projection,
                 null,
@@ -86,8 +94,12 @@ public class CatalogActivity extends AppCompatActivity {
                 null,
                 null,
                 null
-        );
 
+        );
+         */
+        //Query on the contentProvider using a ContentResolver
+        //by using the PetEntry.CONTENT_URI to access the pet data
+        Cursor cursor =  getContentResolver().query(PetEntry.CONTENT_URI, projection, null, null, null);
 
 
 
@@ -104,6 +116,7 @@ public class CatalogActivity extends AppCompatActivity {
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
+
 
             displayView.setText("Number of rows in pets database table: " + cursor.getCount()+"\n\n");
             displayView.append(PetEntry._ID + "_" +
@@ -138,6 +151,7 @@ public class CatalogActivity extends AppCompatActivity {
                         currentWeight+
                         "\n");
             }
+             
 
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
@@ -148,6 +162,7 @@ public class CatalogActivity extends AppCompatActivity {
 
     }
     private void insertPet(){
+
         //Make and instance of the class PetDbHelper to use the as to
         // where in databse columns you are pointing too
         //PetDbHelper mDbHelper = new PetDbHelper(this);
@@ -156,7 +171,7 @@ public class CatalogActivity extends AppCompatActivity {
         //to the method getReadableDatabase
         //SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        //Not in use only for manual db access SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         ContentValues Values = new ContentValues();
         //
@@ -165,12 +180,19 @@ public class CatalogActivity extends AppCompatActivity {
         Values.put(PetEntry.COLUMN_PET_GENDER,"Male");
         Values.put(PetEntry.COLUMN_PET_WEIGHT,7);
 
+        // Insert a new row for Toto into the provider using the ContentResolver.
+        // Use the {@link PetEntry#CONTENT_URI} to indicate that we want to insert
+        // into the pets database table.
+        // Receive the new content URI that will allow us to access Toto's data in the future.
+        Uri newUri = getContentResolver().insert(PetEntry.CONTENT_URI, Values);
+        Log.v("New row", "New row ID"+newUri);
+
         //Inser data into a new row
         //You dont need to add the long newROWID =
         //That is just to make use for the Log.v(tag...,msg... + string)
-        long newRowId = db.insert(PetEntry.TABLE_NAME,null, Values);
-
-        Log.v("New row", "New row ID"+newRowId);
+        // But his is a bad way instead use the contentProvider
+        //long newRowId = db.insert(PetEntry.TABLE_NAME,null, Values);
+        //Log.v("New row", "New row ID"+newRowId);
     }
 
     @Override
