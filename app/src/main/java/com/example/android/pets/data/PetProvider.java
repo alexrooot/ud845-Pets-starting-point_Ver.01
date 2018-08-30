@@ -1,6 +1,7 @@
 package com.example.android.pets.data;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -10,6 +11,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.example.android.pets.data.PetContract.PetEntry;
+
 
 /**
  * {@link ContentProvider} for Pets app.
@@ -22,6 +24,19 @@ public class PetProvider extends ContentProvider {
 
     /** URI matcher code for the content URI for a single pet in the pets table */
     private static final int PET_ID = 101;
+
+
+    /**
+     * The MIME type of the {@link #CONTENT_URI} for a list of pets.
+     */
+    public static final String CONTENT_LIST_TYPE =  //    Need to tell it where this varialbe is so you need to import the package class
+            ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + PetContract.CONTENT_AUTHORITY + "/" + PetContract.PATH_PETS;
+    /**
+     * The MIME type of the {@link #CONTENT_URI} for a single pet.
+     */
+    public static final String CONTENT_ITEM_TYPE =  //    Need to tell it where this varialbe is so you need to import the package class
+            ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + PetContract.CONTENT_AUTHORITY + "/" + PetContract.PATH_PETS;
+
 
     /**
      * UriMatcher object to match a content URI to a corresponding code.
@@ -36,7 +51,7 @@ public class PetProvider extends ContentProvider {
         // should recognize. All paths added to the UriMatcher have a corresponding code to return
         // when a match is found.
 
-        // TODO: Add 2 content URIs to URI matcher
+        // TO DO: Add 2 content URIs to URI matcher
         sUriMatcher.addURI(PetContract.CONTENT_AUTHORITY,PetContract.PATH_PETS, PETS);
         sUriMatcher.addURI(PetContract.CONTENT_AUTHORITY,PetContract.PATH_PETS+"/#",PET_ID);
     }
@@ -53,6 +68,7 @@ public class PetProvider extends ContentProvider {
 
         // Figure out if the URI matcher can match the URI to a specific code
         int match = sUriMatcher.match(uri);
+        // test each case to the variable that was passed down as parameter
         switch (match) {
             case PETS:
                 // For the PETS code, query the pets table directly with the given
@@ -87,7 +103,10 @@ public class PetProvider extends ContentProvider {
 
 
     @Override
+    //Uri is the unique resource identifier,
+    // ContetValues is the data with other data inside of it.
     public Uri insert(Uri uri, ContentValues contentValues) {
+        //ask android to find uri code with one inside android device
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case PETS:
@@ -101,11 +120,26 @@ public class PetProvider extends ContentProvider {
      * Insert a pet into the database with the given content values. Return the new content URI
      * for that specific row in the database.
      */
+    // Uri is the data type that indicates to use unique resource identifier
+    //                          ContentValues are the data variables passes as parameters
     private Uri insertPet(Uri uri, ContentValues values) {
 
         // TO DO: Insert a new pet into the pets database table with the given ContentValues
         // Get writeable database
         SQLiteDatabase database = mDbhelper.getReadableDatabase();
+
+        //Sanity check values that were pass into insertPet method that things are written corretly.
+        //            values is the big variable with the data content inside
+        //                to get a specific element first ask for a specific data type
+        //                      Ask for class file PetEntry then ask for specific BaseColumns
+        String name = values.getAsString(PetEntry.COLUMN_PET_NAME);
+        String breed = values.getAsString(PetEntry.COLUMN_PET_BREED);
+        int gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
+        int weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+        if (name == null || gender < 1 ||gender < 0 || weight < 0) {
+            throw new IllegalArgumentException("Pet requires a name");
+        }
+
         // Insert the new pet with the given values
         //I also imported the Petentry of that specific package into this class so you can shorten out resource destination
         long id = database.insert(PetEntry.TABLE_NAME, null, values);
@@ -116,6 +150,65 @@ public class PetProvider extends ContentProvider {
         // Once we know the ID of the new row in the table,
         // return the new URI with the ID appended to the end of it
         return ContentUris.withAppendedId(uri, id);
+    }
+
+    @Override
+    // you may need too inherite class files.
+    //Uri is the unique resource identifier,
+    // ContetValues is the data with other data inside of it.
+    //selection is the BaseColumns in the database
+    //selectionArgs is where you find males, or Toto names
+    public int update(Uri uri, ContentValues contentValues, String selection,
+                      String[] selectionArgs) {
+
+
+
+
+        //ask android to find uri code with one inside android device
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS://updates all or many columns
+                return updatePet(uri, contentValues, selection, selectionArgs);
+            case PET_ID://updates selected rows based on selectionArgs
+                // For the PET_ID code, extract out the ID from the URI,
+                // so we know which row to update. Selection will be "_id=?" and selection
+                // arguments will be a String array containing the actual ID.
+                selection = PetEntry._ID + "=?";
+                selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                return updatePet(uri, contentValues, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Update is not supported for " + uri);
+        }
+    }
+
+    /**
+     * Update pets in the database with the given content values. Apply the changes to the rows
+     * specified in the selection and selection arguments (which could be 0 or 1 or more pets).
+     * Return the number of rows that were successfully updated.
+     */
+    private int updatePet(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+
+        //Sanity check values that were pass into insertPet method that things are written corretly.
+        //            values is the big variable with the data content inside
+        //                to get a specific element first ask for a specific data type
+        //                      Ask for class file PetEntry then ask for specific BaseColumns
+        String name = values.getAsString(PetEntry.COLUMN_PET_NAME),
+                breed = values.getAsString(PetEntry.COLUMN_PET_BREED);
+        Integer  gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER),
+                weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
+        if (name == null || gender < 1 ||gender < 0 ||gender == null || weight < 0) {
+            throw new IllegalArgumentException("Pet requires a name, gender, weight, breed");
+        }
+        // If there are no values to update, then don't try to update the database
+        if (values.size() == 0) {
+            return 0;
+        }
+
+        // get writeable database to update the data
+        SQLiteDatabase database = mDbhelper.getWritableDatabase();
+
+        // Returns the number of database rows affected by the update statement & excutes the update instruction
+        return database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);
     }
 
     /** Tag for the log messages
@@ -162,18 +255,34 @@ public class PetProvider extends ContentProvider {
 
     /**
      * Updates the data at the given selection and selection arguments, with the new ContentValues.
-     */
+     * Dont use this is the old manual way now use the contentProviders
     @Override
     public int update(Uri uri, ContentValues contentValues, String selection, String[] selectionArgs) {
         return 0;
     }
+     */
 
     /**
      * Delete the data at the given selection and selection arguments.
      */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        // Get writeable database just to see what we can use
+        SQLiteDatabase database = mDbhelper.getWritableDatabase();
+        // ask android to find a uri codes in the device to comapre to ourse using switch
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                // Delete all rows that match the selection and selection args
+                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+            case PET_ID:
+                // Delete a single row given by the ID in the URI
+                selection = PetEntry._ID + "=?";
+                selectionArgs = new String[]{String.valueOf(ContentUris.parseId(uri))};
+                return database.delete(PetEntry.TABLE_NAME, selection, selectionArgs);
+            default:
+                throw new IllegalArgumentException("Deletion is not supported for " + uri);
+        }
     }
 
     /**
@@ -181,7 +290,15 @@ public class PetProvider extends ContentProvider {
      */
     @Override
     public String getType(Uri uri) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return PetEntry.CONTENT_LIST_TYPE;
+            case PET_ID:
+                return PetEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+        }
     }
 
 }
