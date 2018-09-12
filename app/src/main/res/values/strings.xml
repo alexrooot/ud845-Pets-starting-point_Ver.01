@@ -61,13 +61,27 @@
     <!-- Text Message for success in inserting new pet into database from the Edit window -->
 
     <string name ="Edite_Fail_insert_log">The Manual edit entered did not enter the correctly value</string>
-    <!-- Text Message for success in inserting new pet into database from the Edit window -->
 
+    <!-- Text Message for success in inserting new pet into database from the Edit window -->
     <string name ="Edite_success_insert_log">Yes the manual edit entered did  enter the correctly value</string>
 
     <!-- Text for toast in Edit window success-->
     <string name = "Edit_Pet_Enter_Successuly">Saved =)</string>
 
+    <!-- Title text for the empty view, which describes the empty dog house image [CHAR LIMIT=50] -->
+    <string name="empty_view_title_text">It\'s a bit lonely here...</string>
+
+    <!-- Subtitle text for the empty view that prompts the user to add a pet [CHAR LIMIT=50] -->
+    <string name="empty_view_subtitle_text">Get started by adding a pet</string>
+
+    <!-- Title text for Editor Activity when You are editing a pet infromation -->
+    <string name="editor_activity_title_edit_pet">Edit Pet</string>
+
+    <!-- Toast message for indication update on a pet after a cursor returns a number of number meaning the row it was insrted on -->
+    <string name="editor_update_pet_failed">Editor update failed</string>
+
+    <!-- Toast mesage to indicate the update on a pet after a cursor return a number meaning the row it was inserted on was sucefull -->
+    <string name="editor_update_pet_successful">Editor update pet successful!</string>
     <!--More to come -->
 
 </resources>

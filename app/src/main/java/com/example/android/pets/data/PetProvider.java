@@ -15,6 +15,9 @@ import com.example.android.pets.data.PetContract.PetEntry;
 
 /**
  * {@link ContentProvider} for Pets app.
+ * this is the content provider  for database pets making step 2 step 1 CatalogActivty step 2 PetProvider
+ * is the class where all data changes for the PetTable are triggered
+ * extends COntentProvider is to make use of make use of android URI system
  */
 public class PetProvider extends ContentProvider {
 
@@ -27,12 +30,12 @@ public class PetProvider extends ContentProvider {
 
 
     /**
-     * The MIME type of the {@link #CONTENT_URI} for a list of pets.
+     * The MIME type of the {@#CONTENT_URI} for a list of pets.
      */
     public static final String CONTENT_LIST_TYPE =  //    Need to tell it where this varialbe is so you need to import the package class
             ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + PetContract.CONTENT_AUTHORITY + "/" + PetContract.PATH_PETS;
     /**
-     * The MIME type of the {@link #CONTENT_URI} for a single pet.
+     * The MIME type of the {@ #CONTENT_URI} for a single pet.
      */
     public static final String CONTENT_ITEM_TYPE =  //    Need to tell it where this varialbe is so you need to import the package class
             ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + PetContract.CONTENT_AUTHORITY + "/" + PetContract.PATH_PETS;
@@ -61,9 +64,11 @@ public class PetProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
         // Get readable database
+        // remember to initialize the variable mDbhelper as reference to the class PetDbHelper
         SQLiteDatabase database = mDbhelper.getReadableDatabase();
 
         // This cursor will hold the result of the query
+        //Make and object of type Cursor with the name cursor
         Cursor cursor;
 
         // Figure out if the URI matcher can match the URI to a specific code
@@ -90,7 +95,7 @@ public class PetProvider extends ContentProvider {
                 selection = PetContract.PetEntry._ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
 
-                // This will perform a query on the pets table where the _id equals 3 to return a
+                // This will perform a query on the pets table where the _id equals 3,2,6... to return a
                 // Cursor containing that row of the table.
                 cursor = database.query(PetContract.PetEntry.TABLE_NAME, projection, selection, selectionArgs,
                         null, null, sortOrder);
@@ -98,12 +103,17 @@ public class PetProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
         }
+        //ask object cursor to setup notification method
+        //      that notification takes in getcontext.getcontentresolver so that it know to use content resolver
+        // from android system then you just specify what URI the system will be observant
+        cursor.setNotificationUri(getContext().getContentResolver(),uri);
         return cursor;
     }
 
 
     @Override
     //Uri is the unique resource identifier,
+    // this type insert was used for insert of dummy data were all contentvalues are manually program in java.
     // ContetValues is the data with other data inside of it.
     public Uri insert(Uri uri, ContentValues contentValues) {
         //ask android to find uri code with one inside android device
@@ -125,7 +135,8 @@ public class PetProvider extends ContentProvider {
     private Uri insertPet(Uri uri, ContentValues values) {
 
         // TO DO: Insert a new pet into the pets database table with the given ContentValues
-        // Get writeable database
+        // Get writeable database make sure have initialize and object to the java class
+        // file PetDbHelper before in this case mDbHelper
         SQLiteDatabase database = mDbhelper.getReadableDatabase();
 
         //Sanity check values that were pass into insertPet method that things are written corretly.
@@ -136,7 +147,7 @@ public class PetProvider extends ContentProvider {
         String breed = values.getAsString(PetEntry.COLUMN_PET_BREED);
         int gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER);
         int weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
-        if (name == null || gender < 1 ||gender < 0 || weight < 0) {
+        if (name == null || weight == 0) {
             throw new IllegalArgumentException("Pet requires a name");
         }
 
@@ -147,17 +158,19 @@ public class PetProvider extends ContentProvider {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
             return null;
         }
+        //notify all listner that the database has change for the the specific URI, on null/ any observer
+        getContext().getContentResolver().notifyChange(uri, null);
         // Once we know the ID of the new row in the table,
         // return the new URI with the ID appended to the end of it
         return ContentUris.withAppendedId(uri, id);
     }
 
     @Override
-    // you may need too inherite class files.
+    // you may need too inherit class files.
     //Uri is the unique resource identifier,
-    // ContetValues is the data with other data inside of it.
+    // ContentValues is the data with other data inside of it.
     //selection is the BaseColumns in the database
-    //selectionArgs is where you find males, or Toto names
+    //selectionArgs is wherever you find males, or Toto names
     public int update(Uri uri, ContentValues contentValues, String selection,
                       String[] selectionArgs) {
 
@@ -175,6 +188,10 @@ public class PetProvider extends ContentProvider {
                 // arguments will be a String array containing the actual ID.
                 selection = PetEntry._ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+
+
+                //notify all listner that the database has change for the the specific URI, on null/ any observer
+                getContext().getContentResolver().notifyChange(uri, null);
                 return updatePet(uri, contentValues, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Update is not supported for " + uri);
@@ -196,7 +213,7 @@ public class PetProvider extends ContentProvider {
                 breed = values.getAsString(PetEntry.COLUMN_PET_BREED);
         Integer  gender = values.getAsInteger(PetEntry.COLUMN_PET_GENDER),
                 weight = values.getAsInteger(PetEntry.COLUMN_PET_WEIGHT);
-        if (name == null || gender < 1 ||gender < 0 ||gender == null || weight < 0) {
+        if (name == null  ) {
             throw new IllegalArgumentException("Pet requires a name, gender, weight, breed");
         }
         // If there are no values to update, then don't try to update the database
@@ -206,6 +223,9 @@ public class PetProvider extends ContentProvider {
 
         // get writeable database to update the data
         SQLiteDatabase database = mDbhelper.getWritableDatabase();
+
+        //notify all listner that the database has change for the the specific URI, on null/ any observer
+        getContext().getContentResolver().notifyChange(uri, null);
 
         // Returns the number of database rows affected by the update statement & excutes the update instruction
         return database.update(PetEntry.TABLE_NAME, values, selection, selectionArgs);

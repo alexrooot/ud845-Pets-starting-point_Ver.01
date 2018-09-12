@@ -42,6 +42,7 @@ public class PetCursorAdapter extends CursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         // Return such instruction to inflate layout
         //                                    list_item_xml desing
+        //Meaning it will create the two textViews for each listview on the window
         return LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
     }
 
@@ -61,9 +62,9 @@ public class PetCursorAdapter extends CursorAdapter {
         TextView tvName = (TextView) view.findViewById(R.id.name);
         TextView tvSummary = (TextView) view.findViewById(R.id.summary);
 
-        int nameColumnIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_NAME);
-        int breedColumnIndex = cursor.getColumnIndex(PetContract.PetEntry.COLUMN_PET_BREED);
-        //Extract indivual data from cursor object
+        //Extract indivual data from cursor object in string format
+        //                              Ask cursor object to see inside a column index from a database object
+        //                                                              Ask that database to look at column name ****..
         String mCusorName = cursor.getString(cursor.getColumnIndexOrThrow(PetContract.PetEntry.COLUMN_PET_NAME));
         String mCusorSummary = cursor.getString(cursor.getColumnIndexOrThrow(PetContract.PetEntry.COLUMN_PET_BREED));
         //use the destenation field varaible to set text from extracted cursor varaible
