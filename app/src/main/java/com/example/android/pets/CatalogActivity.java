@@ -94,9 +94,11 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 //                                                  and you want to open the EditorActivity class
                 Intent edite_update = new Intent(CatalogActivity.this, EditorActivity.class);
                 // Ask for the current URI so it would be asking for the database entry you click on
-                Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI,id);
+                //                       Increase the Id by 1 since the database uses row 0 for the columns names
+                Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI,++id);
                 //pass on parameter of uri database into the object of  edite_update
                 edite_update.setData(currentPetUri);
+                Log.v("Passed down", "New row ID"+id);
 
                 // rember to specify to start the intent and pass on this object so the activity can
                 // what database row was click on which will be received by protected void onCreate(Bundle savedInstanceState)
@@ -206,11 +208,24 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                deleteallPets();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    private void deleteallPets() {
+        // You would want to create an object to represent the entier databse Uri
+        Uri destryDb = PetEntry.CONTENT_URI;
+        //Then you should want to have all columns with any argument be selected to be deleted
+        int rowDeleted = getContentResolver().delete(destryDb, null,null);
+        Log.v("catalogActivty",rowDeleted + " Rows deleted from pet databse");
+        // to restart the this activty class we are going to make the intent to start up again
+        Intent restart = getIntent();
+        // we then call on the start so that we can clear up the listview.
+        startActivity(restart);
+    }
+
     // the 3 overwrite methods ware part of the implements LoaderManager.LoaderCallbacks<Cursor>
     // that is used for background tread
     @Override
