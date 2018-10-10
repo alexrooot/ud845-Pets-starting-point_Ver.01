@@ -158,7 +158,7 @@ public class PetProvider extends ContentProvider {
             Log.e(LOG_TAG, "Failed to insert row for " + uri);
             return null;
         }
-        //notify all listner that the database has change for the the specific URI, on null/ any observer
+        //notify all listener that the database has change for the the specific URI, on null/ any observer
         getContext().getContentResolver().notifyChange(uri, null);
         // Once we know the ID of the new row in the table,
         // return the new URI with the ID appended to the end of it

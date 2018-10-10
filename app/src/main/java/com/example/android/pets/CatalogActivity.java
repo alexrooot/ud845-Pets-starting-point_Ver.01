@@ -88,17 +88,23 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
             //view is the particular view for the item
             // id is the position of the item in listview
             //long is
-            public void onItemClick(AdapterView<?> adapterView, View view, int id, long uriId) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long uriId) {
+                int rowId = (int) view.getTag();
                 // create your intent object
                 //                      say that the object is going to be and intent from the this class file
                 //                                                  and you want to open the EditorActivity class
                 Intent edite_update = new Intent(CatalogActivity.this, EditorActivity.class);
                 // Ask for the current URI so it would be asking for the database entry you click on
                 //                       Increase the Id by 1 since the database uses row 0 for the columns names
-                Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI,++id);
+                //Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI,position);//Adding 1 to position will solve the problems of deleted items later
+
+                //the above will just take in the row of ID/URI of the first ever infalted row
+                //Replace position with int rowId that is getting a tag value from PetCursurAdapter
+                //From the bindView
+                Uri currentPetUri = ContentUris.withAppendedId(PetEntry.CONTENT_URI,rowId);
                 //pass on parameter of uri database into the object of  edite_update
                 edite_update.setData(currentPetUri);
-                Log.v("Passed down", "New row ID"+id);
+                Log.v("Passed down", "New row ID"+position);
 
                 // rember to specify to start the intent and pass on this object so the activity can
                 // what database row was click on which will be received by protected void onCreate(Bundle savedInstanceState)

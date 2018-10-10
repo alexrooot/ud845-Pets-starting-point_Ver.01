@@ -61,7 +61,9 @@ public class PetCursorAdapter extends CursorAdapter {
         // find the fields to populate and save as easy variable to call on later
         TextView tvName = (TextView) view.findViewById(R.id.name);
         TextView tvSummary = (TextView) view.findViewById(R.id.summary);
-
+        int rowid = cursor.getInt(cursor.getColumnIndex(PetContract.PetEntry._ID));// this will create and object with the actual datadase row that will
+        view.setTag(rowid);// Also make it the id a tag vieable by others with view.setTag()
+        // be usefull for listView
         //Extract indivual data from cursor object in string format
         //                              Ask cursor object to see inside a column index from a database object
         //                                                              Ask that database to look at column name ****..
@@ -69,6 +71,14 @@ public class PetCursorAdapter extends CursorAdapter {
         String mCusorSummary = cursor.getString(cursor.getColumnIndexOrThrow(PetContract.PetEntry.COLUMN_PET_BREED));
         //use the destenation field varaible to set text from extracted cursor varaible
         tvName.setText(mCusorName);
-        tvSummary.setText(mCusorSummary);
+        //use .isEmpty to check if there are any character values will return True or false
+        //Use .equals(null) if there is a null value for string in this case the database returns ""
+
+        // Ask if the database return and empty charter string and write unknown if string is empty
+        if (mCusorSummary.isEmpty()) {
+            tvSummary.setText(R.string.unknown_breed);
+        }else{
+            tvSummary.setText(mCusorSummary);
+        }
     }
 }

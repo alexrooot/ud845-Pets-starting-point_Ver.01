@@ -59,6 +59,8 @@ import static com.example.android.pets.data.PetContract.PetEntry._ID;
 /**
  * Allows user to create a new pet or edit an existing one.
  */
+// to get a something started from an intent lisview use LoaderManager.LoaderCallbacks<Cursor> and add all the missing methods and build your to do things there
+    // but call on that
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     // make a boolean variable to flag if some value change in the edit filed
@@ -273,10 +275,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             mNameEditText.setError("Required");
             compltedFields = false;
         }
-        if (TextUtils.isEmpty(mBreedEditText.getText().toString())){
-            mBreedEditText.setError("Required");
-            compltedFields = false;
-        }
+
         if (mGender == PetContract.PetEntry.GENDER_UNKNOWN){
             Toast.makeText(getApplicationContext(),R.string.edit_error_required_field,Toast.LENGTH_SHORT);
         }
